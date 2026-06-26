@@ -6,6 +6,8 @@ import com.lawfirm.caseledger.dto.TaxRecordDto;
 import com.lawfirm.caseledger.service.TaxRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.math.BigDecimal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,8 +41,10 @@ public class TaxRecordController {
     public Result<Integer> generate(
             @RequestParam Integer year,
             @RequestParam Integer month,
-            @RequestParam(required = false) List<Long> lawyerIds) {
-        return Result.success(taxRecordService.generateRecords(year, month, lawyerIds));
+            @RequestParam(required = false) List<Long> lawyerIds,
+            @RequestParam(required = false) BigDecimal additionalDeduction,
+            @RequestParam(required = false) BigDecimal otherDeduction) {
+        return Result.success(taxRecordService.generateRecords(year, month, lawyerIds, additionalDeduction, otherDeduction));
     }
 
     @DeleteMapping("/{id}")

@@ -27,6 +27,10 @@
           <el-icon><Money /></el-icon>
           <span>收入登记</span>
         </el-menu-item>
+        <el-menu-item index="/expense/list" v-if="userStore.hasPermission('expense')">
+          <el-icon><CreditCard /></el-icon>
+          <span>支出管理</span>
+        </el-menu-item>
         <el-menu-item index="/ledger" v-if="userStore.hasPermission('ledger')">
           <el-icon><Document /></el-icon>
           <span>个人账户</span>
@@ -92,7 +96,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { HomeFilled, Folder, Money, Document, Box, Wallet, Coin, UploadFilled, Setting, ArrowDown } from '@element-plus/icons-vue'
+import { HomeFilled, Folder, Money, CreditCard, Document, Box, Wallet, Coin, UploadFilled, Setting, ArrowDown } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()

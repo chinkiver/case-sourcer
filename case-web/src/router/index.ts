@@ -67,6 +67,11 @@ const router = createRouter({
           name: 'system-role',
           component: () => import('@/views/system/RoleList.vue'),
         },
+        {
+          path: 'expense/list',
+          name: 'expense-list',
+          component: () => import('@/views/expense/ExpenseList.vue'),
+        },
       ],
     },
   ],

@@ -14,4 +14,12 @@ public class AccountSummaryDto {
     private BigDecimal totalExpense;
     private BigDecimal currentBalance;
     private BigDecimal pendingArchiveFee;
+
+    // 分类汇总
+    private BigDecimal totalProjectIncome;
+    private BigDecimal totalCommission;
+    private BigDecimal totalSocialInsurance;
+    private BigDecimal totalTax;
+    private BigDecimal totalPayout;
+    private BigDecimal availableWithdrawal;
 }

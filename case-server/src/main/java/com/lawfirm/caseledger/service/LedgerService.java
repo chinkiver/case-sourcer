@@ -63,26 +63,46 @@ public class LedgerService {
         }
 
         QueryWrapper<AccountTransaction> wrapper = new QueryWrapper<>();
-        wrapper.eq("lawyer_id", queryLawyerId).eq("deleted", 0);
+        wrapper.eq("lawyer_id", queryLawyerId).eq("deleted", 0).orderByAsc("create_time");
         List<AccountTransaction> txns = accountTransactionMapper.selectList(wrapper);
 
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
         BigDecimal pendingArchiveFee = BigDecimal.ZERO;
+        BigDecimal totalProjectIncome = BigDecimal.ZERO;
+        BigDecimal totalCommission = BigDecimal.ZERO;
+        BigDecimal totalSocialInsurance = BigDecimal.ZERO;
+        BigDecimal totalTax = BigDecimal.ZERO;
+        BigDecimal totalPayout = BigDecimal.ZERO;
         for (AccountTransaction txn : txns) {
             if (txn.getAmount().compareTo(BigDecimal.ZERO) > 0) {
                 totalIncome = totalIncome.add(txn.getAmount());
             } else {
                 totalExpense = totalExpense.add(txn.getAmount().abs());
             }
-            if ("暂扣档案费".equals(txn.getTxnType())) {
+            String type = txn.getTxnType();
+            if ("项目收款".equals(type)) {
+                totalProjectIncome = totalProjectIncome.add(txn.getAmount());
+            } else if ("账户增加".equals(type)) {
+                totalCommission = totalCommission.add(txn.getAmount());
+            } else if ("暂扣档案费".equals(type)) {
                 pendingArchiveFee = pendingArchiveFee.add(txn.getAmount().abs());
+            } else if ("社保公积金扣款".equals(type)) {
+                totalSocialInsurance = totalSocialInsurance.add(txn.getAmount().abs());
+            } else if ("个税扣缴".equals(type)) {
+                totalTax = totalTax.add(txn.getAmount().abs());
+            } else if (type != null && ("个人报销".equals(type) || "工资发放".equals(type) || "其他支出".equals(type))) {
+                totalPayout = totalPayout.add(txn.getAmount().abs());
             }
         }
 
         BigDecimal currentBalance = txns.isEmpty()
                 ? (lawyer.getOpeningBalance() != null ? lawyer.getOpeningBalance() : BigDecimal.ZERO)
                 : txns.get(txns.size() - 1).getBalance();
+        BigDecimal availableWithdrawal = currentBalance.subtract(pendingArchiveFee);
+        if (availableWithdrawal.compareTo(BigDecimal.ZERO) < 0) {
+            availableWithdrawal = BigDecimal.ZERO;
+        }
 
         AccountSummaryDto summary = new AccountSummaryDto();
         summary.setLawyerId(lawyer.getId());
@@ -92,6 +112,12 @@ public class LedgerService {
         summary.setTotalExpense(totalExpense);
         summary.setCurrentBalance(currentBalance);
         summary.setPendingArchiveFee(pendingArchiveFee);
+        summary.setTotalProjectIncome(totalProjectIncome);
+        summary.setTotalCommission(totalCommission);
+        summary.setTotalSocialInsurance(totalSocialInsurance);
+        summary.setTotalTax(totalTax);
+        summary.setTotalPayout(totalPayout);
+        summary.setAvailableWithdrawal(availableWithdrawal);
         return summary;
     }
 

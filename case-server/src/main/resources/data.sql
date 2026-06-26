@@ -28,7 +28,9 @@ INSERT IGNORE INTO sys_permission (id, permission_code, permission_name, parent_
 (19, 'report', '报表统计', 0, 'menu', '/report', 7),
 (20, 'tax', '个税管理', 0, 'menu', '/tax', 8),
 (21, 'tax:record', '个税扣缴', 20, 'menu', '/tax/record', 1),
-(22, 'import', '数据导入', 0, 'menu', '/import', 9);
+(22, 'import', '数据导入', 0, 'menu', '/import', 9),
+(23, 'expense', '支出管理', 0, 'menu', '/expense/list', 10),
+(24, 'expense:add', '新增支出', 23, 'button', 'POST:/api/expenses', 1);
 
 -- 初始化管理员账号，密码为 admin123（BCrypt 加密）
 INSERT IGNORE INTO sys_user (username, password, real_name, phone, status) VALUES
@@ -43,7 +45,7 @@ SELECT 1, id FROM sys_permission;
 
 -- 给财务人员赋权
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
-SELECT 2, id FROM sys_permission WHERE permission_code LIKE 'project:%' OR permission_code LIKE 'income:%' OR permission_code LIKE 'ledger:%' OR permission_code LIKE 'archive:%' OR permission_code LIKE 'social:%' OR permission_code LIKE 'report:%' OR permission_code LIKE 'tax:%' OR permission_code = 'import';
+SELECT 2, id FROM sys_permission WHERE permission_code LIKE 'project:%' OR permission_code LIKE 'income:%' OR permission_code LIKE 'ledger:%' OR permission_code LIKE 'archive:%' OR permission_code LIKE 'social:%' OR permission_code LIKE 'report:%' OR permission_code LIKE 'tax:%' OR permission_code LIKE 'expense:%' OR permission_code = 'import';
 
 -- 给律师赋权
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id)

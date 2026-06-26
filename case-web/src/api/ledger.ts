@@ -8,6 +8,12 @@ export interface AccountSummary {
   totalExpense: number
   currentBalance: number
   pendingArchiveFee: number
+  totalProjectIncome?: number
+  totalCommission?: number
+  totalSocialInsurance?: number
+  totalTax?: number
+  totalPayout?: number
+  availableWithdrawal?: number
 }
 
 export interface AccountTransaction {

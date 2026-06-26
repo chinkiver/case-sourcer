@@ -72,6 +72,12 @@
             <el-option v-for="item in lawyerList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
+        <el-form-item label="专项附加扣除">
+          <el-input-number v-model="generateForm.additionalDeduction" :min="0" :precision="2" :step="100" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="其他扣除">
+          <el-input-number v-model="generateForm.otherDeduction" :min="0" :precision="2" :step="100" style="width: 100%" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="generateVisible = false">取消</el-button>
@@ -111,6 +117,8 @@ const generateForm = reactive({
   year: new Date().getFullYear(),
   month: new Date().getMonth() + 1,
   lawyerIds: [] as number[],
+  additionalDeduction: 0,
+  otherDeduction: 0,
 })
 
 const generateRules = {
@@ -159,6 +167,8 @@ const handleGenerate = () => {
   generateForm.year = new Date().getFullYear()
   generateForm.month = new Date().getMonth() + 1
   generateForm.lawyerIds = []
+  generateForm.additionalDeduction = 0
+  generateForm.otherDeduction = 0
   generateVisible.value = true
 }
 
@@ -169,6 +179,8 @@ const submitGenerate = async () => {
     const params: any = {
       year: generateForm.year,
       month: generateForm.month,
+      additionalDeduction: generateForm.additionalDeduction,
+      otherDeduction: generateForm.otherDeduction,
     }
     if (generateForm.lawyerIds && generateForm.lawyerIds.length > 0) {
       params.lawyerIds = generateForm.lawyerIds

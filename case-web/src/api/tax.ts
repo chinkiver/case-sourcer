@@ -27,10 +27,16 @@ export const getTaxRecordList = (params: any): Promise<{ records: TaxRecord[]; t
   return request.get('/api/tax-records', { params })
 }
 
-export const generateTaxRecords = (params: { year: number; month: number; lawyerIds?: number[] }): Promise<number> => {
+export const generateTaxRecords = (params: { year: number; month: number; lawyerIds?: number[]; additionalDeduction?: number; otherDeduction?: number }): Promise<number> => {
   const query: any = { year: params.year, month: params.month }
   if (params.lawyerIds && params.lawyerIds.length > 0) {
     query.lawyerIds = params.lawyerIds.join(',')
+  }
+  if (params.additionalDeduction !== undefined) {
+    query.additionalDeduction = params.additionalDeduction
+  }
+  if (params.otherDeduction !== undefined) {
+    query.otherDeduction = params.otherDeduction
   }
   return request.post('/api/tax-records/generate', null, { params: query })
 }

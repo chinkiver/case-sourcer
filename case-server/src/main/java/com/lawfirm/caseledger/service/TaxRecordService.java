@@ -73,7 +73,8 @@ public class TaxRecordService {
     }
 
     @Transactional
-    public int generateRecords(Integer year, Integer month, List<Long> lawyerIds) {
+    public int generateRecords(Integer year, Integer month, List<Long> lawyerIds,
+                               BigDecimal additionalDeduction, BigDecimal otherDeduction) {
         List<Lawyer> lawyers;
         if (lawyerIds == null || lawyerIds.isEmpty()) {
             QueryWrapper<Lawyer> wrapper = new QueryWrapper<>();
@@ -100,9 +101,12 @@ public class TaxRecordService {
         LocalDate txnDate = LocalDate.of(year, month, 1);
         String txnMonth = txnDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
 
+        BigDecimal monthAdditional = additionalDeduction != null ? additionalDeduction : BigDecimal.ZERO;
+        BigDecimal monthOther = otherDeduction != null ? otherDeduction : BigDecimal.ZERO;
+
         int count = 0;
         for (Lawyer lawyer : lawyers) {
-            TaxRecord record = calculateTax(lawyer, year, month, threshold);
+            TaxRecord record = calculateTax(lawyer, year, month, threshold, monthAdditional, monthOther);
             if (record.getIncomeAmount().compareTo(BigDecimal.ZERO) > 0 || record.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
                 taxRecordMapper.insert(record);
                 if (record.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
@@ -123,15 +127,25 @@ public class TaxRecordService {
         taxRecordMapper.deleteById(id);
     }
 
-    private TaxRecord calculateTax(Lawyer lawyer, Integer year, Integer month, BigDecimal threshold) {
+    private TaxRecord calculateTax(Lawyer lawyer, Integer year, Integer month, BigDecimal threshold,
+                                   BigDecimal monthAdditional, BigDecimal monthOther) {
         String txnMonth = String.format("%d-%02d", year, month);
         BigDecimal monthlyIncome = getMonthlyIncome(lawyer.getId(), txnMonth);
         BigDecimal monthlySocial = getMonthlySocialInsurance(lawyer.getId(), year, month);
 
         BigDecimal cumulativeIncome = getCumulativeIncome(lawyer.getId(), year, month);
         BigDecimal cumulativeSocial = getCumulativeSocialInsurance(lawyer.getId(), year, month);
+        BigDecimal cumulativeAdditional = getCumulativeDeduction(lawyer.getId(), year, month, "additional_deduction");
+        cumulativeAdditional = cumulativeAdditional.add(monthAdditional);
+        BigDecimal cumulativeOther = getCumulativeDeduction(lawyer.getId(), year, month, "other_deduction");
+        cumulativeOther = cumulativeOther.add(monthOther);
+
         BigDecimal cumulativeThreshold = threshold.multiply(new BigDecimal(month));
-        BigDecimal cumulativeTaxable = cumulativeIncome.subtract(cumulativeSocial).subtract(cumulativeThreshold);
+        BigDecimal cumulativeTaxable = cumulativeIncome
+                .subtract(cumulativeSocial)
+                .subtract(cumulativeAdditional)
+                .subtract(cumulativeOther)
+                .subtract(cumulativeThreshold);
         if (cumulativeTaxable.compareTo(BigDecimal.ZERO) < 0) {
             cumulativeTaxable = BigDecimal.ZERO;
         }
@@ -156,8 +170,8 @@ public class TaxRecordService {
         record.setIncomeAmount(monthlyIncome);
         record.setDeductibleAmount(threshold);
         record.setSpecialDeduction(monthlySocial);
-        record.setAdditionalDeduction(BigDecimal.ZERO);
-        record.setOtherDeduction(BigDecimal.ZERO);
+        record.setAdditionalDeduction(monthAdditional);
+        record.setOtherDeduction(monthOther);
         record.setTaxableIncome(cumulativeTaxable);
         record.setTaxRate(bracket.getRate());
         record.setQuickDeduction(bracket.getQuickDeduction());
@@ -200,6 +214,24 @@ public class TaxRecordService {
             sum = sum.add(getMonthlySocialInsurance(lawyerId, year, m));
         }
         return sum;
+    }
+
+    private BigDecimal getCumulativeDeduction(Long lawyerId, Integer year, Integer month, String field) {
+        if (month <= 1) {
+            return BigDecimal.ZERO;
+        }
+        QueryWrapper<TaxRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("lawyer_id", lawyerId).eq("year", year).lt("month", month).eq("deleted", 0);
+        List<TaxRecord> records = taxRecordMapper.selectList(wrapper);
+        return records.stream()
+                .map(r -> {
+                    if ("additional_deduction".equals(field)) {
+                        return r.getAdditionalDeduction() != null ? r.getAdditionalDeduction() : BigDecimal.ZERO;
+                    } else {
+                        return r.getOtherDeduction() != null ? r.getOtherDeduction() : BigDecimal.ZERO;
+                    }
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal getPreviousCumulativeTax(Long lawyerId, Integer year, Integer month) {

@@ -9,8 +9,14 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover">
-          <div class="stat-title">累计收入</div>
-          <div class="stat-value success">{{ formatMoney(summary.totalIncome) }}</div>
+          <div class="stat-title">可提款金额</div>
+          <div class="stat-value success">{{ formatMoney(summary.availableWithdrawal) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover">
+          <div class="stat-title">暂扣档案费</div>
+          <div class="stat-value warning">{{ formatMoney(summary.pendingArchiveFee) }}</div>
         </el-card>
       </el-col>
       <el-col :span="6">
@@ -19,10 +25,43 @@
           <div class="stat-value danger">{{ formatMoney(summary.totalExpense) }}</div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+    </el-row>
+
+    <el-row :gutter="20" class="summary-row">
+      <el-col :span="4">
         <el-card shadow="hover">
-          <div class="stat-title">暂扣档案费</div>
-          <div class="stat-value warning">{{ formatMoney(summary.pendingArchiveFee) }}</div>
+          <div class="stat-title small">项目收款</div>
+          <div class="stat-value small success">{{ formatMoney(summary.totalProjectIncome) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover">
+          <div class="stat-title small">提成入账</div>
+          <div class="stat-value small success">{{ formatMoney(summary.totalCommission) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover">
+          <div class="stat-title small">社保公积金</div>
+          <div class="stat-value small danger">{{ formatMoney(summary.totalSocialInsurance) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover">
+          <div class="stat-title small">个税扣缴</div>
+          <div class="stat-value small danger">{{ formatMoney(summary.totalTax) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover">
+          <div class="stat-title small">其他支出</div>
+          <div class="stat-value small danger">{{ formatMoney(summary.totalPayout) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover">
+          <div class="stat-title small">期初余额</div>
+          <div class="stat-value small">{{ formatMoney(summary.openingBalance) }}</div>
         </el-card>
       </el-col>
     </el-row>
@@ -94,6 +133,12 @@ const summary = reactive<AccountSummary>({
   totalExpense: 0,
   currentBalance: 0,
   pendingArchiveFee: 0,
+  totalProjectIncome: 0,
+  totalCommission: 0,
+  totalSocialInsurance: 0,
+  totalTax: 0,
+  totalPayout: 0,
+  availableWithdrawal: 0,
 })
 const transactionList = ref<AccountTransaction[]>([])
 const lawyerList = ref<any[]>([])
@@ -110,7 +155,7 @@ const pagination = reactive({
   total: 0,
 })
 
-const txnTypes = ['项目收款', '账户增加', '暂扣档案费', '扣缴社保', '扣缴个税', '个人报销', '发放工资', '社保公积金', '提款']
+const txnTypes = ['项目收款', '账户增加', '暂扣档案费', '社保公积金扣款', '个税扣缴', '个人报销', '工资发放', '其他支出']
 
 const formatMoney = (value?: number) => {
   if (value == null) return '¥0.00'
@@ -185,6 +230,13 @@ onMounted(async () => {
 .stat-value.success { color: #67c23a; }
 .stat-value.danger { color: #f56c6c; }
 .stat-value.warning { color: #e6a23c; }
+.stat-title.small {
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.stat-value.small {
+  font-size: 18px;
+}
 .table-card {
   min-height: 500px;
 }
