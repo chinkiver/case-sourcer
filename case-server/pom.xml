@@ -103,6 +103,12 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Flyway for database migrations -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+		</dependency>
+
 		<!-- Apache POI for Excel import -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
