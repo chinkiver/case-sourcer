@@ -217,10 +217,16 @@ onMounted(async () => {
   margin-right: 6px;
 }
 .permission-tree-wrapper {
+  width: 100%;
   max-height: 320px;
   overflow: auto;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
   padding: 10px;
+  background-color: #f3f4f6;
+}
+.permission-tree-wrapper .el-tree {
+  width: 100%;
+  background-color: transparent;
 }
 </style>
