@@ -80,6 +80,8 @@ CREATE TABLE IF NOT EXISTS client (
     client_type TINYINT DEFAULT 1 COMMENT '1委托人 2当事人',
     phone VARCHAR(20) COMMENT '联系电话',
     id_card VARCHAR(18) COMMENT '身份证号',
+    birth_date DATE COMMENT '出生日期（从身份证号解析）',
+    gender VARCHAR(4) COMMENT '性别（从身份证号解析）',
     address VARCHAR(255) COMMENT '地址',
     remark VARCHAR(500) COMMENT '备注',
     deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
@@ -277,7 +279,8 @@ INSERT IGNORE INTO sys_permission (id, permission_code, permission_name, parent_
 (21, 'tax:record', '个税扣缴', 20, 'menu', '/tax/record', 1),
 (22, 'import', '数据导入', 0, 'menu', '/import', 9),
 (23, 'expense', '支出管理', 0, 'menu', '/expense/list', 10),
-(24, 'expense:add', '新增支出', 23, 'button', 'POST:/api/expenses', 1);
+(24, 'expense:add', '新增支出', 23, 'button', 'POST:/api/expenses', 1),
+(25, 'client:add', '新建委托人/当事人', 7, 'button', 'POST:/api/clients', 4);
 
 -- 初始化管理员账号，密码为 admin123（BCrypt 加密）
 INSERT IGNORE INTO sys_user (username, password, real_name, phone, status) VALUES
@@ -296,7 +299,7 @@ SELECT 2, id FROM sys_permission WHERE permission_code LIKE 'project:%' OR permi
 
 -- 给律师赋权
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
-SELECT 4, id FROM sys_permission WHERE permission_code IN ('project:list','project:add','income:add','ledger:view');
+SELECT 4, id FROM sys_permission WHERE permission_code IN ('project:list','project:add','income:add','ledger:view','client:add');
 
 -- 系统配置
 INSERT IGNORE INTO sys_config (config_key, config_value, description) VALUES
