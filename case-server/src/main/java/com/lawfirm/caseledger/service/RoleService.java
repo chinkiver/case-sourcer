@@ -92,7 +92,7 @@ public class RoleService {
             throw new BusinessException("角色不存在");
         }
         roleMapper.deleteById(id);
-        rolePermissionMapper.delete(new QueryWrapper<SysRolePermission>().eq("role_id", id));
+        rolePermissionMapper.physicalDeleteByRoleId(id);
     }
 
     private boolean existsByCode(String roleCode) {
@@ -102,7 +102,7 @@ public class RoleService {
     }
 
     private void assignPermissions(Long roleId, List<Long> permissionIds) {
-        rolePermissionMapper.delete(new QueryWrapper<SysRolePermission>().eq("role_id", roleId));
+        rolePermissionMapper.physicalDeleteByRoleId(roleId);
         if (CollectionUtils.isEmpty(permissionIds)) {
             return;
         }

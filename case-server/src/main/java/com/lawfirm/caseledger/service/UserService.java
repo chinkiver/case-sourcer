@@ -92,7 +92,7 @@ public class UserService {
             throw new BusinessException("用户不存在");
         }
         userMapper.deleteById(id);
-        userRoleMapper.delete(new QueryWrapper<SysUserRole>().eq("user_id", id));
+        userRoleMapper.physicalDeleteByUserId(id);
     }
 
     @Transactional
@@ -112,7 +112,7 @@ public class UserService {
     }
 
     private void assignRoles(Long userId, List<Long> roleIds) {
-        userRoleMapper.delete(new QueryWrapper<SysUserRole>().eq("user_id", userId));
+        userRoleMapper.physicalDeleteByUserId(userId);
         if (CollectionUtils.isEmpty(roleIds)) {
             return;
         }
